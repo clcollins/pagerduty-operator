@@ -110,3 +110,16 @@ func TestSanitizeLabelSelector(t *testing.T) {
 		})
 	}
 }
+
+func TestClusterDeploymentSelectorReturnsErrors(t *testing.T) {
+	_, err := clusterDeploymentSelector(&metav1.LabelSelector{
+		MatchExpressions: []metav1.LabelSelectorRequirement{
+			{
+				Key:      "region",
+				Operator: metav1.LabelSelectorOpIn,
+			},
+		},
+	})
+
+	assert.Error(t, err)
+}
