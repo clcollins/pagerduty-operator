@@ -19,6 +19,7 @@ package pagerdutyintegration
 import (
 	hivev1 "github.com/openshift/hive/apis/hive/v1"
 	pagerdutyv1alpha1 "github.com/openshift/pagerduty-operator/api/v1alpha1"
+	"github.com/openshift/pagerduty-operator/config"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -54,7 +55,8 @@ func Test_enqueueRequestForClusterDeployment_toRequests(t *testing.T) {
 			obj: &hivev1.ClusterDeployment{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"pdiWatching": "clusterDeployment1",
+						"pdiWatching":                        "clusterDeployment1",
+						config.ClusterDeploymentManagedLabel: "true",
 					},
 				},
 			},
@@ -129,7 +131,8 @@ func Test_enqueueRequestForClusterDeploymentOwner_getAssociatedPagerDutyIntegrat
 						Name:      "clusterDeployment1",
 						Namespace: "ns1",
 						Labels: map[string]string{
-							"pdiWatching": "clusterDeployment1",
+							"pdiWatching":                        "clusterDeployment1",
+							config.ClusterDeploymentManagedLabel: "true",
 						},
 					},
 				},
@@ -191,6 +194,13 @@ func Test_enqueueRequestForConfigmap_toRequests(t *testing.T) {
 }
 
 func mockPagerDutyIntegration(name string, labels map[string]string) *pagerdutyv1alpha1.PagerDutyIntegration {
+	matchLabels := map[string]string{
+		config.ClusterDeploymentManagedLabel: "true",
+	}
+	for key, value := range labels {
+		matchLabels[key] = value
+	}
+
 	return &pagerdutyv1alpha1.PagerDutyIntegration{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -199,7 +209,7 @@ func mockPagerDutyIntegration(name string, labels map[string]string) *pagerdutyv
 		Spec: pagerdutyv1alpha1.PagerDutyIntegrationSpec{
 			EscalationPolicy: "ABC123",
 			ClusterDeploymentSelector: metav1.LabelSelector{
-				MatchLabels: labels,
+				MatchLabels: matchLabels,
 			},
 			ServicePrefix: "test",
 			PagerdutyApiKeySecretRef: corev1.SecretReference{
