@@ -243,7 +243,7 @@ func (r *PagerDutyIntegrationReconciler) getAllClusterDeployments() (*hivev1.Clu
 }
 
 func (r *PagerDutyIntegrationReconciler) getMatchingClusterDeployments(pdi *pagerdutyv1alpha1.PagerDutyIntegration) (*hivev1.ClusterDeploymentList, error) {
-	selector, err := metav1.LabelSelectorAsSelector(&pdi.Spec.ClusterDeploymentSelector)
+	selector, err := clusterDeploymentSelector(&pdi.Spec.ClusterDeploymentSelector)
 	if err != nil {
 		return nil, err
 	}
